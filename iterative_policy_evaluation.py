@@ -10,6 +10,8 @@
 ################################################################################
 # Open up terminal and do the following
 # $ cd <into the folder where this file is>
+# //this folder must also contain grid_world.py
+# //https://github.com/Opimenov/Reinforcement_Learning/blob/master/grid_world.py
 # $ python3
 # >>> from iterative_policy_evaluation import run_algorithm
 # >>> run_algorithm(show_all_iterations=True) # if you want to see iterations
