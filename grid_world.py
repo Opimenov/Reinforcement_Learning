@@ -57,7 +57,8 @@ class Grid_World(object): #environment
         self.state_actions = {}
         self.action_result = {}
         self.action_probabilities = {}
-        self.start_state = (0,0)
+        self.start_state = (0, 0)
+        self.current_state = (0, 0)
         for i in range(rows):
             for j in range(cols):
                 self.states.append((i,j))
@@ -98,25 +99,15 @@ class Grid_World(object): #environment
         '''retuns a list of actions for a given state'''
         return self.actions[state]
 
-    def set_current_state(self, state):
-        '''state is a tuple (row,col)
-        sets current state of the env to be state'''
-        self.current_state = state
-
-    def current_state(self):
-        '''returns current state of the env'''
-        return self.current_state
-
     def take_action(self, action):
         '''action - action from available list of actions.
         Checks if action is allowed for this state. If it is not
         does nothing. Otherwise sets current state to resulting state'''
-        if action not in self.actions[current_state]:
+        if action not in self.state_actions[self.current_state]:
             print("Action {0} is not allowed for this state.".format(action))
             return
         else:
-            self.current_state = \
-            self.action_result[(self.current_state,action)]
+            self.current_state = self.action_result[(self.current_state, action)]
         
     def is_terminal_state(self, state):
         return state in self.current_state
@@ -150,6 +141,22 @@ class Grid_World(object): #environment
             print("|")
         for col in range(self.cols):
             print("+---",end="")
+        print("+")
+
+    def show_current_state(self):
+        print("#####CURRENT STATE#####")
+        for row in range(self.rows):
+            for col in range(self.cols):
+                print("+---", end="")
+            print("+")
+            for col in range(self.cols):
+                if self.current_state == (row, col):
+                    print("| X ", end="")
+                else:
+                    print("|   ", end="")
+            print("|")
+        for col in range(self.cols):
+            print("+---",  end="")
         print("+")
 
     def str_list(self, list):
@@ -198,14 +205,15 @@ class Grid_World(object): #environment
         self.show_policy()
 # end of Grid_World class
 
+
 def init_simple_grid():
-    g = Grid_World(4,4)
+    g = Grid_World(4, 4)
     #init all states
     g.discount = 1
     #set starting and terminal states
     g.start_state = (0,0)
-    g.terminal_states.append((g.rows-1,g.cols-1))
-    #init all rewards except terminal state to be -1
+    g.terminal_states.append((g.rows-1, g.cols-1))
+    # init all rewards except terminal state to be -1
     for state in g.states:
         if state in g.terminal_states:
             g.rewards[state] = 0

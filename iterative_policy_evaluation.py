@@ -100,7 +100,25 @@ def run_algorithm(show_all_iterations=False):
             print("policy evaluated")
             show_values(values, grid, iteration)
             break
-#    return values
+
+    # play
+
+    grid = init_simple_grid()
+    print('Evaluating performance...')
+    while(grid.current_state not in grid.terminal_states):
+        possible_actions = grid.state_actions[grid.current_state]
+        best_action = None
+        highest_value = float("-inf")
+        for action in possible_actions:
+            next_state = grid.action_result[(grid.current_state, action)]
+            next_state_value = values[next_state]
+            if next_state_value > highest_value:
+                highest_value = next_state_value
+                best_action = action
+        grid.show_current_state()
+        print(best_action)
+        grid.take_action(best_action)
+    grid.show_current_state()
 
 
 if __name__ == '__main__':
