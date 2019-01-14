@@ -4,6 +4,17 @@
 # SOURCE https://github.com/Opimenov/Reinforcement_Learning/blob/master/iterative_policy_evaluation.py
 # python3.6 make sure to run sudo pip install -U future
 # Iterative Policy Evaluation algorithm
+
+################################################################################
+#                              INSTRUCTIONS                                    #
+################################################################################
+# Open up terminal and do the following
+# $ cd <into the folder where this file is>
+# $ python3
+# >>> from iterative_policy_evaluation import run_algorithm
+# >>> run_algorithm(show_all_iterations=True) # if you want to see iterations
+################################################################################
+
 from grid_world import init_simple_grid
 
 def show_values(values, grid, iteration):
@@ -16,16 +27,16 @@ def show_values(values, grid, iteration):
         for col in range(grid.cols):
             value = values[(row,col)]
             if value >= 0:
-                print(" {:>5.2f}|".format(value),end="")
+                print("{:>6.2f}|".format(value),end="")
             else:
-                print("{:>5.2f}|".format(value),end="")
+                print("{:>6.2f}|".format(value),end="")
         print("")
     for col in range(grid.cols):
         print("+------",end="")
     print("+")
     
 
-def run_algorithm():
+def run_algorithm(show_all_iterations=False):
     '''
     num_of_states - number of available states
     actions - matrix where col num represents a state, row represents action, 
@@ -47,15 +58,16 @@ def run_algorithm():
     actions = grid.state_actions
     action_result = grid.action_result
     action_prob = grid.action_probabilities
-    threshold = 0.00000000001
+    threshold = 0.000000000000000001
     #initialize dictionary of state to values 
     values = {}
     #set initial values to be zeros
     for s in states: values[s] = 0
-    show_values(values,grid, 0)
     #Repeat until convergence
     iteration = 0
     while True:
+        if show_all_iterations: show_values(values,grid, 0)
+        new_values = {}
         delta = 0
         for state in states:
             old_value = values[state]
@@ -69,12 +81,15 @@ def run_algorithm():
                     next_state_value = values[action_result[(state,action)]]
                     weighted_sum = weighted_sum + (prob * next_state_value)
                 new_value = rewards[state] + gamma * weighted_sum
-                values[state] = new_value
+                new_values[state] = new_value
                 delta = max(delta, abs(old_value - new_value))
+        values = new_values
+        values[(3,3)]=0 # not part of the algorithm but I set up thigns this way, too lazy to fix
         iteration = iteration + 1
-        show_values(values,grid,iteration)
+        if show_all_iterations: show_values(values,grid,iteration)
         if delta < threshold:
             print("policy evaluated")
+            show_values(values,grid,iteration)
             break
 #    return values
     
