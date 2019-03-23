@@ -9,6 +9,9 @@ from __future__ import print_function, division
 from builtins import range
 import numpy as np
 
+# this grid world is deterministic, in a sense that each
+# allowed action has definitive result. There is no environment
+# acting upon our agent.
 class Grid_World(object): #environment
     '''
     Grid world implementation for exercises from Sutton RL book.
@@ -48,7 +51,7 @@ class Grid_World(object): #environment
         and each move is penilized with -1 reward.
         Reward for leaving each state is -1, for
         terminal state is 0'''
-        
+        self.values = {}
         self.rows = rows
         self.cols = cols
         self.states = []
@@ -56,7 +59,7 @@ class Grid_World(object): #environment
         self.all_actions = []
         self.state_actions = {}
         self.action_result = {}
-        self.action_probabilities = {}
+        self.action_probabilities = {} # policy
         self.start_state = (0,0)
         for i in range(rows):
             for j in range(cols):
@@ -157,14 +160,19 @@ class Grid_World(object): #environment
         for t in list: s = s+t
         return s
         
-    def show_actions(self):
-        print("#####ACTIONS#####")
+    def show_policy(self):
+        print("#####POLICY#####")
         for row in range(self.rows):
             for col in range(self.cols):
                 print("+----",end="")
             print("+\n|",end="")
             for col in range(self.cols):
-                print("{:>4}|".format(self.str_list(self.state_actions[(row,col)])),end="")
+                actions = []
+                for action in self.state_actions[(row,col)]:
+                    #show only if action probability is greater than 0
+                    if self.action_probabilities[((row,col),action)] != 0:
+                        actions.append(action)
+                print("{:>4}|".format(self.str_list(actions)),end="")
             print("")
         for col in range(self.cols):
             print("+----",end="")
@@ -174,8 +182,8 @@ class Grid_World(object): #environment
         '''action probability pair'''
         return ""+str(pair[0])+":"+str(pair[1])
         
-    def show_policy(self):
-        print("#####POLICY#####")
+    def show_all_action_probabilities(self):
+        print("#####ACTION PROBABILITIES#####")
         for row in range(self.rows):
             print("+-------------------------------------+")            
             for col in range(self.cols):
@@ -190,12 +198,46 @@ class Grid_World(object): #environment
                 print("")
             print("")
 
+    def show_values(self):
+        if not self.values: # values are empty, get out
+            return
+        '''values is a dict from (row,col) to scalar value'''
+        print("#####VALUES#####")
+        for row in range(self.rows):
+            for col in range(self.cols):
+               print("+------",end="")
+            print("+\n|",end="")
+            for col in range(self.cols):
+               value = self.values[(row,col)]
+               if value >= 0:
+                   print("{:>6.2f}|".format(value),end="")
+               else:
+                   print("{:>6.2f}|".format(value),end="")
+            print("")
+        for col in range(self.cols):
+            print("+------",end="")
+        print("+")
+
+    def show_deterministic_policy(self):
+        print("#####BEST ACTIONS#####")
+        for row in range(self.rows):
+            for col in range(self.cols):
+                print("+----",end="")
+            print("+\n|",end="")
+            for col in range(self.cols):
+                print("{:>4}|".format(self.str_list(self.state_actions[(row,col)])),end="")
+            print("")
+        for col in range(self.cols):
+            print("+----",end="")
+        print("+")
+
         
     def show_env(self):
         self.show_grid()
         self.show_rewards()
-        self.show_actions()
+        self.show_all_action_probabilities()
         self.show_policy()
+        self.show_values()
 # end of Grid_World class
 
 def init_simple_grid():
@@ -244,9 +286,11 @@ def init_simple_grid():
     g.action_probabilities[((0,1),R)]=0.33
     g.action_probabilities[((0,1),D)]=0.33
     g.action_probabilities[((0,1),L)]=0.33
+    g.action_probabilities[((0,1),U)]=0
     g.action_probabilities[((0,2),R)]=0.33
     g.action_probabilities[((0,2),D)]=0.33
     g.action_probabilities[((0,2),L)]=0.33
+    g.action_probabilities[((0,2),U)]=0
     g.action_probabilities[((0,3),D)]=0.5
     g.action_probabilities[((0,3),L)]=0.5
     g.action_probabilities[((0,3),U)]=0
@@ -369,6 +413,6 @@ def init_simple_grid():
     g.action_result[((3,3),U)]=(3,3)
     g.action_result[((3,3),R)]=(3,3)
     g.action_result[((3,3),L)]=(3,3)
-
-    g.show_env()
+    #uncomment to display detailed grid debuggin info
+    #g.show_env()
     return g

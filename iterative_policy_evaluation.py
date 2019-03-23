@@ -2,7 +2,6 @@
 # developed as a part of Reinforcement Learning learning
 # BLOG  https://programmingbee.net/
 # SOURCE https://github.com/Opimenov/Reinforcement_Learning/blob/master/iterative_policy_evaluation.py
-# python3.6 make sure to run sudo pip install -U future
 # Iterative Policy Evaluation algorithm
 
 ################################################################################
@@ -13,8 +12,11 @@
 # //this folder must also contain grid_world.py
 # //https://github.com/Opimenov/Reinforcement_Learning/blob/master/grid_world.py
 # $ python3
-# >>> from iterative_policy_evaluation import run_algorithm
-# >>> run_algorithm(show_all_iterations=True) # if you want to see iterations
+# >>> from grid_world import *
+# >>> from iterative_policy_evaluation import *
+# >>> simple_grid = init_simple_grid()
+# >>> evaluate_policy_iteratively(simple_grid, show_all_iterations=True)
+# Set show_all_iterations=False if you don't want to see all iterations
 ################################################################################
 
 from grid_world import init_simple_grid
@@ -38,7 +40,7 @@ def show_values(values, grid, iteration):
     print("+")
     
 
-def run_algorithm(show_all_iterations=False):
+def evaluate_policy_iteratively(grid, show_all_iterations=False):
     '''
     num_of_states - number of available states
     actions - matrix where col num represents a state, row represents action, 
@@ -53,13 +55,12 @@ def run_algorithm(show_all_iterations=False):
               num of states x num of actions. Each row contains probabilities
               of taking some action while being in row state
     '''
-    grid = init_simple_grid()
     states = grid.states
     gamma = grid.discount
     rewards = grid.rewards
     actions = grid.state_actions
     action_result = grid.action_result
-    action_prob = grid.action_probabilities
+    action_prob = grid.action_probabilities # policy
     threshold = 0.000000000000000001
     #initialize dictionary of state to values 
     values = {}
@@ -93,5 +94,4 @@ def run_algorithm(show_all_iterations=False):
             print("policy evaluated")
             show_values(values,grid,iteration)
             break
-#    return values
-    
+    return values
