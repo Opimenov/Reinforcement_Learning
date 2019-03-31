@@ -61,19 +61,20 @@ class Grid_World(object): #environment
         self.action_result = {}
         self.action_probabilities = {} # policy
         self.start_state = (0,0)
+        self.terminal_states = []        
         for i in range(rows):
             for j in range(cols):
                 self.states.append((i,j))
-                self.terminal_states = []
+        self.current_state = (0,0)
 
     def set_discount(self, discount):
         '''sets the discount factor'''
         self.discount = discount
 
-    def set_starting_position(self, row, col):
-        ''' sets agents starting position to be (row,col)'''
-        self.start_state = (row,col)
-        self.current_state = (row,col)
+    def set_starting_position(self, state):
+        ''' sets agents starting position to be state(row,col)'''
+        self.start_state = state
+        self.current_state = state
 
     def add_terminal_state(self, row,col):
         ''' adds terminal position row,col to the list of 
@@ -90,7 +91,7 @@ class Grid_World(object): #environment
 
     def set_policy(self, policy):
         '''policy - dict from (state,action) tuple to probability'''
-        self.policy = policy
+        self.action_probabilities = policy
 
     def set_action_results(self, action_result):
         '''action_result - dict from (state,action)
@@ -108,21 +109,13 @@ class Grid_World(object): #environment
 
     def current_state(self):
         '''returns current state of the env'''
-        return self.current_state
-
-    def take_action(self, action):
-        '''action - action from available list of actions.
-        Checks if action is allowed for this state. If it is not
-        does nothing. Otherwise sets current state to resulting state'''
-        if action not in self.actions[current_state]:
-            print("Action {0} is not allowed for this state.".format(action))
-            return
-        else:
-            self.current_state = \
-            self.action_result[(self.current_state,action)]
+        return self.current_state            
         
     def is_terminal_state(self, state):
-        return state in self.current_state
+        return state in self.terminal_states
+
+    def at_terminal_state(self):
+        return self.current_state in self.terminal_states
 
     def show_grid(self):
         print("#####STATES#####")
@@ -238,6 +231,52 @@ class Grid_World(object): #environment
         self.show_all_action_probabilities()
         self.show_policy()
         self.show_values()
+
+    def take_action(self, action):
+        '''
+        Checks if action is allowed for this state. If it is not
+        does nothing. Otherwise sets current state to resulting state
+        Arguments:
+           action - action from available list of actions.
+        Return:
+           reward - reward for leaving current state, as a result of the action
+        '''
+        reward = 0
+        if action not in self.state_actions[self.current_state]:
+            print("Action {0} is not allowed for this state.".format(action))
+        else:
+            reward = self.rewards[self.current_state]
+            self.current_state = self.action_result[(self.current_state,action)]
+        return reward
+
+
+    #since we want our policy to be non-deterministic we are goint to
+    #use the following function to pick action with some probability
+    #np.random.choice(
+    #         ['UP', 'DOWN', 'LEFT', 'RIGHT'],
+    #         1  # we are only picking one element
+    #       p=[ 0.5,   0.1,    0.1,    0.3])
+    # actual prob values will be different
+    def select_action(self):
+        s = self.current_state
+        acts = []
+        probs = []
+        for a in self.state_actions[self.current_state]:
+           # this will make sure that values are lined up
+           acts.append(a)
+           probs.append(self.action_probabilities[(s,a)])
+
+        #choice returns an array with a single element, so [0]
+        return np.random.choice(acts, 1, probs)[0]
+
+                        
+    def move(self):
+        '''
+        Return reward that we got from taking an action
+        '''
+        return self.take_action(self.select_action())
+        
+        
 # end of Grid_World class
 
 def init_simple_grid():
